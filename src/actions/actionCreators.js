@@ -65,3 +65,68 @@ export function saveServiceSuccess(item) {
 export function saveServiceFailure(id, error) {
     return {type: SAVE_SERVICE_FAILURE, payload: {id, error}}
 }
+
+export const fetchServices = () => async (dispatch) => {
+    dispatch(fetchServicesRequest());
+    try {
+        const response = await fetch(process.env.REACT_APP_API_URL);
+        if (!response.ok) {
+            throw new Error('Произошла ошибка!');
+        }
+        const services = await response.json();
+        dispatch(fetchServicesSuccess(services));
+    } catch (error) {
+        dispatch(fetchServicesFailure(error.message));
+    }
+};
+
+export const removeService = (id) => async (dispatch) => {
+    dispatch(removeServiceRequest(id));
+    try {
+        const response = await fetch(process.env.REACT_APP_API_URL + '/' + id, {method: 'DELETE'});
+        if (!response.ok) {
+            throw new Error('Произошла ошибка!');
+        }
+        dispatch(removeServiceSuccess(id));
+    } catch (error) {
+        dispatch(removeServiceFailure(id, error.message));
+    }
+}
+
+export const fetchService = (id) => async (dispatch) => {
+    dispatch(fetchServiceRequest(id));
+    try {
+        const response = await fetch(process.env.REACT_APP_API_URL + '/' + id);
+        if (!response.ok) {
+            throw new Error('Произошла ошибка!');
+        }
+        const service = await response.json();
+        dispatch(fetchServiceSuccess(service));
+    } catch (error) {
+        dispatch(fetchServiceFailure(id, error.message));
+    }
+};
+
+export const saveService = (item, history) => async (dispatch) => {
+    item.id = Number(item.id);
+    dispatch(saveServiceRequest(item.id));
+    try {
+        const response = await fetch(process.env.REACT_APP_API_URL,
+            {
+                method: 'POST',
+                body: JSON.stringify(item),
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+            });
+        if (!response.ok) {
+            throw new Error('Произошла ошибка!');
+        }
+
+        history.push('/services');
+        dispatch(saveServiceSuccess(item));
+
+    } catch (error) {
+        dispatch(saveServiceFailure(item.id, error.message));
+    }
+}

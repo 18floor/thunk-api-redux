@@ -1,51 +1,7 @@
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {
-    changeServiceField,
-    fetchServiceSuccess,
-    fetchServiceRequest,
-    fetchServiceFailure,
-    saveServiceSuccess,
-    saveServiceRequest,
-    saveServiceFailure
-} from '../actions/actionCreators';
 import Alert from './Alert';
-
-const fetchService = async (id, dispatch) => {
-    dispatch(fetchServiceRequest(id));
-    try {
-        const response = await fetch(process.env.REACT_APP_API_URL + '/' + id);
-        if (!response.ok) {
-            throw new Error('Произошла ошибка!');
-        }
-        const service = await response.json();
-        dispatch(fetchServiceSuccess(service));
-    } catch (error) {
-        dispatch(fetchServiceFailure(id, error.message));
-    }
-};
-
-const saveService = async (item, dispatch, callBack) => {
-    item.id = Number(item.id);
-    dispatch(saveServiceRequest(item.id));
-    try {
-        const response = await fetch(process.env.REACT_APP_API_URL,
-            {
-                method: 'POST',
-                body: JSON.stringify(item),
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-            });
-        if (!response.ok) {
-            throw new Error('Произошла ошибка!');
-        }
-        dispatch(saveServiceSuccess(item));
-        callBack && callBack();
-    } catch (error) {
-        dispatch(saveServiceFailure(item.id, error.message));
-    }
-}
+import {changeServiceField, fetchService, saveService} from '../actions/actionCreators';
 
 function ServiceForm(props) {
     const {history, match} = props;
@@ -53,7 +9,7 @@ function ServiceForm(props) {
     const dispatch = useDispatch();
 
     React.useEffect(() => {
-        fetchService(Number(match.params.id), dispatch);
+        dispatch(fetchService(match.params.id));
     }, [dispatch, match.params.id]);
 
     const handleChange = evt => {
@@ -68,9 +24,7 @@ function ServiceForm(props) {
 
     const handleSubmit = evt => {
         evt.preventDefault();
-        saveService(item, dispatch, () => {
-            history.push('/services')
-        }).then(r => {});
+        dispatch(saveService(item, history));
     }
 
     if (loading) {

@@ -3,41 +3,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faPencilAlt} from '@fortawesome/free-solid-svg-icons';
 import Alert from './Alert';
 import {useSelector, useDispatch} from 'react-redux';
-import {
-    fetchServicesSuccess,
-    fetchServicesRequest,
-    fetchServicesFailure,
-    removeServiceSuccess,
-    removeServiceRequest,
-    removeServiceFailure
-} from '../actions/actionCreators';
-
-const fetchServices = async (dispatch) => {
-    dispatch(fetchServicesRequest());
-    try {
-        const response = await fetch(process.env.REACT_APP_API_URL);
-        if (!response.ok) {
-            throw new Error('Произошла ошибка!');
-        }
-        const services = await response.json();
-        dispatch(fetchServicesSuccess(services));
-    } catch (error) {
-        dispatch(fetchServicesFailure(error.message));
-    }
-};
-
-const removeService = async (id, dispatch) => {
-    dispatch(removeServiceRequest(id));
-    try {
-        const response = await fetch(process.env.REACT_APP_API_URL + '/' + id, {method: 'DELETE'});
-        if (!response.ok) {
-            throw new Error('Произошла ошибка!');
-        }
-        dispatch(removeServiceSuccess(id));
-    } catch (error) {
-        dispatch(removeServiceFailure(id, error.message));
-    }
-}
+import {fetchServices, removeService} from '../actions/actionCreators';
 
 function ServiceList(props) {
     const {history} = props;
@@ -45,13 +11,11 @@ function ServiceList(props) {
     const dispatch = useDispatch();
 
     React.useEffect(() => {
-        fetchServices(dispatch).then(r => {
-        });
+        dispatch(fetchServices());
     }, [dispatch]);
 
     const handleRemove = id => {
-        removeService(id, dispatch).then(r => {
-        });
+        dispatch(removeService(id));
     }
 
     const handleEdit = id => {
